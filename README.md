@@ -1,11 +1,11 @@
 # YouTube → Whisper 转录服务
 
-一个基于 FastAPI 的异步 YouTube 音频转录服务，使用 Whisper AI 模型将 YouTube 视频转换为文字稿。
+一个基于 FastAPI 的异步 YouTube 音频((**youtube‑dl / yt‑dl**)转录服务，使用 Whisper AI (**本地模型**) 将 YouTube 视频转换为文字稿。
 
 ## 功能特性
 
-- 🎥 支持 YouTube 视频链接音频提取
-- 🤖 使用 Whisper AI 进行高精度语音识别
+- 🎥 支持 YouTube 视频链接音频提取(**youtube‑dl / yt‑dl**)
+- 🤖 使用 Whisper AI 进行高精度语音识别(本地模型)
 - 📊 实时进度跟踪（通过 WebSocket）
 - 🚀 异步处理，不阻塞 API 请求
 - 🐳 Docker 容器化部署

@@ -1,0 +1,43 @@
+# Ignore downloaded audio files and transcriptions
+downloads/*
+!downloads/.gitkeep
+
+# Ignore macOS system files
+.DS_Store
+
+# Ignore Python cache and build files
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual environments
+venv/
+env/
+ENV/
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Docker volumes (if any)
+docker-volumes/

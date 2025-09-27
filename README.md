@@ -10,6 +10,7 @@
 - 🚀 异步处理，不阻塞 API 请求
 - 🐳 Docker 容器化部署
 - 🌍 支持多语言转录
+- 🔗 n8n 工作流集成支持
 
 ## 快速开始
 
@@ -166,6 +167,201 @@ curl -X POST "http://localhost:8000/start" \
 curl "http://localhost:8000/status/{job_id}"
 ```
 
+## n8n 工作流集成
+
+本项目可以与 n8n 工作流自动化平台完美集成，实现复杂的自动化转录流程。
+
+### n8n 工作流架构
+
+基于典型的 n8n 工作流模式，您可以构建以下自动化流程：
+
+```
+Webhook 触发 → HTTP 请求启动转录 → 轮询检查状态 → AI 处理结果 → 输出/通知
+```
+
+### 工作流节点配置
+
+#### 1. Webhook 节点（触发器）
+- **方法**: `POST` 或 `GET`
+- **路径**: 自定义 webhook 路径
+- **用途**: 接收 YouTube URL 和转录参数
+- **示例数据**:
+```json
+{
+  "url": "https://www.youtube.com/watch?v=example",
+  "language": "zh",
+  "callback_url": "https://your-app.com/webhook"
+}
+```
+
+#### 2. HTTP Request 节点（启动转录）
+- **方法**: `POST`
+- **URL**: `http://localhost:8000/start`
+- **Headers**: `Content-Type: application/json`
+- **Body**:
+```json
+{
+  "url": "{{$json.url}}",
+  "language": "{{$json.language}}"
+}
+```
+
+#### 3. 条件判断节点（IF）
+- **条件**: 检查 HTTP 响应状态
+- **表达式**: `{{ $statusCode === 200 }}`
+- **True 分支**: 继续轮询状态
+- **False 分支**: 错误处理
+
+#### 4. 循环轮询节点
+- **HTTP Request**: 检查任务状态
+- **URL**: `http://localhost:8000/status/{{$json.job_id}}`
+- **循环条件**: 转录未完成时继续等待
+- **等待时间**: 2-5 秒间隔
+
+#### 5. AI Agent 节点（处理结果）
+- **用途**: 对转录结果进行后续处理
+- **可配置**:
+  - 文本总结
+  - 关键词提取
+  - 内容分类
+  - 翻译处理
+- **Memory**: 存储上下文信息
+- **Tools**: 自定义处理工具
+
+#### 6. 输出节点
+- **Webhook**: 回调通知
+- **Email**: 发送结果邮件
+- **HTTP**: 推送到其他系统
+- **Database**: 保存到数据库
+
+### 完整工作流示例
+
+#### 场景1: 自动视频转录并总结
+```
+1. Webhook 接收 YouTube URL
+2. 启动转录任务
+3. 轮询直到转录完成
+4. AI Agent 生成内容总结
+5. 发送邮件通知用户
+```
+
+#### 场景2: 批量视频处理
+```
+1. 定时触发器（每天执行）
+2. 从数据库获取待处理视频列表
+3. 循环处理每个视频转录
+4. AI 提取关键信息
+5. 保存到知识库
+6. 生成处理报告
+```
+
+#### 场景3: 实时转录服务
+```
+1. Webhook 接收用户请求
+2. WebSocket 实时进度跟踪
+3. 转录完成后 AI 分析
+4. 推送到即时通讯工具
+5. 更新用户界面
+```
+
+### n8n 环境配置
+
+#### 1. 安装 n8n
+```bash
+# Docker 方式
+docker run -it --rm \
+  --name n8n \
+  -p 5678:5678 \
+  n8nio/n8n
+
+# 或使用 npm
+npm install n8n -g
+n8n start
+```
+
+#### 2. 配置环境变量
+```bash
+# n8n 环境变量
+N8N_BASIC_AUTH_ACTIVE=true
+N8N_BASIC_AUTH_USER=admin
+N8N_BASIC_AUTH_PASSWORD=password
+
+# OpenAI API Key（用于 AI Agent）
+OPENAI_API_KEY=your-openai-api-key
+```
+
+#### 3. 工作流导入
+- 在 n8n 界面中创建新工作流
+- 按照上述节点配置构建工作流
+- 测试每个节点的执行
+- 保存并激活工作流
+
+### 最佳实践
+
+#### 1. 错误处理
+- 在每个 HTTP 请求后添加错误处理节点
+- 设置重试机制（最多3次）
+- 记录错误日志到监控系统
+
+#### 2. 性能优化
+- 使用合理的轮询间隔（避免过于频繁）
+- 设置超时时间（防止长时间等待）
+- 批量处理时控制并发数
+
+#### 3. 安全考虑
+- 验证 Webhook 请求来源
+- 使用 HTTPS 协议
+- 定期轮换 API 密钥
+- 限制请求频率
+
+#### 4. 监控和日志
+- 记录每个工作流的执行状态
+- 设置失败告警通知
+- 监控 API 调用频率和响应时间
+
+### 工作流模板
+
+以下是一个基础的工作流 JSON 配置模板：
+
+```json
+{
+  "name": "YouTube Transcription Workflow",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "webhook-node",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [240, 300]
+    },
+    {
+      "parameters": {
+        "url": "http://localhost:8000/start",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "url",
+              "value": "={{ $json.url }}"
+            },
+            {
+              "name": "language",
+              "value": "={{ $json.language }}"
+            }
+          ]
+        }
+      },
+      "id": "start-transcription",
+      "name": "Start Transcription",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 1,
+      "position": [500, 300]
+    }
+  ]
+}
+```
+
 ## 项目结构
 
 ```
@@ -243,3 +439,17 @@ docker-compose up --build -d
 ## 许可证
 
 本项目基于 MIT 许可证开源。
+
+---
+
+### 🎉 扩展功能
+
+通过 n8n 集成，您可以将此转录服务扩展为：
+
+- **内容创作平台**: 自动转录 YouTube 视频并生成博客文章
+- **学习管理系统**: 转录教育视频并生成学习笔记
+- **媒体监控**: 监控特定频道的视频内容并生成报告
+- **多语言内容**: 自动翻译转录内容到多种语言
+- **知识库构建**: 将转录内容结构化存储到知识库中
+
+n8n 的强大功能让您的转录服务能够与数百种其他应用和服务集成，构建完整的自动化工作流程。

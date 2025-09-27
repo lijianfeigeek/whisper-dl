@@ -2,6 +2,9 @@
 downloads/*
 !downloads/.gitkeep
 
+# Ignore Whisper model files (large binary files)
+whisper_bin/*.bin
+
 # Ignore macOS system files
 .DS_Store
 

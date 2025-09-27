@@ -1,0 +1,12 @@
+version: "3.8"
+
+services:
+  yt-whisper-api:
+    build: .
+    container_name: yt_whisper_api
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./downloads:/data          # 存放音频和转写文本
+      - ./whisper_bin:/app/whisper_bin  # 模型挂载
+    restart: unless-stopped

@@ -169,6 +169,8 @@ curl "http://localhost:8000/status/{job_id}"
 
 ## n8n 工作流集成
 
+![](https://raw.githubusercontent.com/lijianfeigeek/whisper-dl/refs/heads/main/SCR-20250927-suxr.png)
+
 本项目可以与 n8n 工作流自动化平台完美集成，实现复杂的自动化转录流程。
 
 ### n8n 工作流架构
@@ -436,12 +438,6 @@ rm -rf downloads/*
 docker-compose up --build -d
 ```
 
-## 许可证
-
-本项目基于 MIT 许可证开源。
-
----
-
 ### 🎉 扩展功能
 
 通过 n8n 集成，您可以将此转录服务扩展为：
@@ -453,3 +449,10 @@ docker-compose up --build -d
 - **知识库构建**: 将转录内容结构化存储到知识库中
 
 n8n 的强大功能让您的转录服务能够与数百种其他应用和服务集成，构建完整的自动化工作流程。
+
+## 许可证
+
+本项目基于 MIT 许可证开源。
+
+---
+
